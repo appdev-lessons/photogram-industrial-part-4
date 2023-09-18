@@ -25,18 +25,24 @@ So navigate to `github.com/codespaces` and reopen your `photogram-industrial` co
 
 <div class="bg-red-100 py-1 px-5" markdown="1">
 
-By the end of this lesson, you should be able to run `rake grade` and get full credit for the `photogram-industrial` automated tests. Additional grading on this project will come from the pull requests that you also open and submit the URLs of.
+By the end of this lesson, you should be able to: 
+
+- Run `rake grade` and get full credit for the `photogram-industrial` automated tests. (Additional grading on this project will come from the pull requests.)
+- Submit two pull requests (PRs) on Canvas for the backend work that you did in Parts 1 and 2 and the frontend work from Parts 3 and 4.
 </div>
 
-## Branch and Open Pull Requests 00:00:00 to 00:05:30
+## Branch and open pull requests
 
-As usual, before we begin, I'd like to create a new branch. First, let's make sure to open pull requests on Github for the branches we've been working on.
+Before we begin, I'd like to create a new branch. First, let's make sure to open pull requests on Github for the branches we've been working on.
 
 Make sure you've pushed the `<initials>-photogram-industrial-2` and `<initials>-starting-on-ui` branches to Github and that `git status` (or, as we aliased it, just `g`) returns `Everything up-to-date`. 
 
-Navigate to your github repository fork of the project (where you have been pushing to). If you switch to one of your branches, you can click a button to open the pull request.
+Navigate to your GitHub repository fork of the project (where you have been pushing to at `github.com/YOUR_USERNAME/photogram-industrial`). If you switch to one of your branches, you can click a button to open the pull request.
 
-**BENP: Need screenshots and/or GIFs here and in the rest of this section. See this chapter: https://chapters.firstdraft.com/chapters/859#use-githubs-interface-to-merge .**
+<div class="bg-blue-100 py-1 px-5" markdown="1">
+
+Follow along with a the video for a visual demonstration of the process here.
+</div>
 
 At this point, you can compare the branch to any of the other branches or commits. I could compare it to the `appdev-projects/photogram-industrial-2` parent repository that we forked it from. That's not always the case because most of the time when you work on your own projects, it will be from a brand new repository and not a fork of somebody elses's repository.
 
