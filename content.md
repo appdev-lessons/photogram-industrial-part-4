@@ -710,7 +710,7 @@ Now the next step is getting the liked photos to show up. Actually, the page we 
 
 First, let's take all of the code for a photo card and create a partial for that `app/views/photos/_photo.html.erb`:
 
-```erb{16,18}
+```erb
 <!-- app/views/photos/_photo.html.erb -->
 
 <div class="row mb-4">
@@ -746,7 +746,7 @@ First, let's take all of the code for a photo card and create a partial for that
 
 Allowing us to replace the code in the `show.html.erb` view template:
 
-```erb{6}
+```erb{5}
 <!-- app/views/users/show.html.erb -->
 
 <!-- ... -->
@@ -762,9 +762,9 @@ There's a lot of `photo`s in there. Let's be clear:
   - The third `photo` is the name of the local variable in `_photo.html.erb` that needs to be assigned something.
   - The fourth `photo` is the block variable `ActiveRecord::Relation` object from the `.each` loop that we are passing to the partial
 
-If that's clear to you, then why not put the partial in the `liked.html.erb` template as well!
+If that's clear to you, then why not put the partial in the `liked.html.erb` template as well! And be sure to change the association accessor to our `liked_photos` method:
 
-```erb{29-31}
+```erb{29}
 <!-- app/views/users/liked.html.erb -->
 
 <div class="row">
@@ -825,3 +825,5 @@ end
 ```
 
 For the `followers` and `following` routes where we aren't showing photos in the interface, you could make a simple UI with a [Bootstrap list group of the relevant users, with links to each](https://getbootstrap.com/docs/5.2/components/list-group).
+
+---
