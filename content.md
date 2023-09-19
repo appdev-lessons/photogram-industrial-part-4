@@ -530,9 +530,6 @@ Lastly, let's style the form with Bootstrap so that it looks good. There are nic
 In Bootstrap version 5, [the form instructions can now be found here](https://getbootstrap.com/docs/5.3/forms/overview/#overview). The video uses the version 4 form components, but the code below (and your code) should use the more recent update.
 </div>
 
-
-Without getting into the HTML for form accessibility, the gist of it here is that we need the class `"form-group"`, and then `"form-control"` around each input:
-
 ```erb{6-7,11}
 <!-- app/views/comments/_form.html.erb -->
 
