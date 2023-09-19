@@ -450,7 +450,7 @@ The test we wrote for you are not extensive and shouldn't be relied on for a ful
 
 With that in mind, we should make some tests in the very near future. But until then, we're safe to edit this code that we just generated and are working on solo:
 
-```erb{16,18}
+```erb{16-24}
 <!-- app/views/comments/_form.html.erb -->
 
 <%= form_with(model: comment) do |form| %>
@@ -466,13 +466,13 @@ With that in mind, we should make some tests in the very near future. But until 
     </div>
   <% end %>
 
-  <%= form.hidden :photo_id %>
+  <%= form.hidden_field :photo_id %>
 
-  <div class="field">
+  <div>
     <%= form.text_area :body %>
   </div>
 
-  <div class="actions">
+  <div>
     <%= form.submit %>
   </div>
 <% end %>
