@@ -387,14 +387,14 @@ Now's a good time to...
 g acm "Added own photos to users#show"
 ```
 
-## User Profile Add Comment 00:28:00 ot 00:39:00
+## User profile add comment
 
-The next step is to add a comment form at the bottom of each photo card. Happily, because of the `scaffold` generator, we already have comment forms ready for us as a partial in `app/views/comments/` as `_form.html.erb`:
+The next step is to add a comment form at the bottom of each photo card. Happily, because of the `scaffold` generator, we already have comment forms ready for us as a partial in `app/views/comments/` as `_form.html.erb`, so let's just render those in:
 
-```erb
+```erb{16-18}
 <!-- app/views/users/show.html.erb -->
 
-...
+<!-- ... -->
           <% photo.comments.each do |comment| %>
             <li class="list-group-item">
               <div class="media">
@@ -415,16 +415,15 @@ The next step is to add a comment form at the bottom of each photo card. Happily
   </div>
 <% end %>
 ```
-{: mark_lines="16-18"}
 
 Is that going to work? Refresh and find out. 
 
 No, because of an `undefined local variable or method comment` in this partial. The form is expecting us to pass a `comment` as a local variable: 
 
-```erb
+```erb{5:(36-56)}
 <!-- app/views/users/show.html.erb -->
 
-...
+<!-- ... -->
         <div class="card-body">
           <%= render "comment/form", comment: Comment.new %>
         </div>
@@ -433,17 +432,23 @@ No, because of an `undefined local variable or method comment` in this partial. 
   </div>
 <% end %>
 ```
-{: mark_lines="5"}
 
-Now we have a comment form below every photo! It doesn't look great though, because it was auto-generated. For instance, we don't want the user to have type in the "Author" or "Photo" fields. Those IDs should be pre-filled and hidden. The user should only see the "Body" field (with the label hidden as well).
+Now we have a comment form below every photo! It doesn't look great though, because it was auto-generated. For instance, we don't want the user to have to type in the "Author" or "Photo" fields. Those IDs should be pre-filled and hidden. The user should only see the "Body" field (with the label hidden as well).
 
 That means we'll need to go into the `comments/_form.html.erb` partial to make some changes. 
 
 Before I make any changes to a partial, I first need to be sure that no one else is using it; as in, no other view templates are relying on it. When we start to use partials, we are coupling our codebase. This is the perfect example of why **automated tests** are so vital. If you had tests covering all of your view templates, you wouldn't need to worry about breaking anything for other people working on the codebase.
 
-With that in mind, we should make some tests in the very near future. But until then, we're safe to edit this code that we just generated and are working on alone:
+<div class="bg-red-100 py-1 px-5" markdown="1">
 
-```erb
+Actually, there are a few automated tests in the project now in the updated version. Run them with `rake grade`. You may need to go back to the _Photogram Industrial Part 1_ lesson to relaunch the assignment and retrieve your Grades token to enter into this project.
+
+The test we wrote for you are not extensive and shouldn't be relied on for a full refactoring; but they are a nice starting point!
+</div>
+
+With that in mind, we should make some tests in the very near future. But until then, we're safe to edit this code that we just generated and are working on solo:
+
+```erb{16,18}
 <!-- app/views/comments/_form.html.erb -->
 
 <%= form_with(model: comment) do |form| %>
@@ -470,16 +475,14 @@ With that in mind, we should make some tests in the very near future. But until 
   </div>
 <% end %>
 ```
-{: mark_lines="16 18"}
 
-We just completely deleted the `:author_id` field, made the `:photo_id` hidden, and the `:body` label. Because we want the IDs auto-filled, we can do that in the `comments_controller.rb` in the `create` action:
+We completely deleted the `:author_id` field, made the `:photo_id` hidden, and removed the `:body` label. Because we want the IDs auto-filled, we can do that in the `comments_controller.rb` in the `create` action:
 
-```ruby
+```ruby{7}
 # app/controllers/comments_controller.rb
 
 class CommentsController < ApplicationController
-  ...
-  # POST /comments or /comments.json
+  # ...
   def create
     @comment = Comment.new(comment_params)
     @comment.author = current_user
@@ -494,37 +497,36 @@ class CommentsController < ApplicationController
       end
     end
   end
-  ...
+  # ...
 end
 ```
-{: mark_lines="8"}
 
 Note that we can just use the `current_user` method that devise created for us, and assign columns with that. Rails can figure out what column we want to extract and assign.
 
 But how do we get the current photo ID into the form? Have a look at the `render` method in the user's show page. Right now we have:
 
 ```erb
-          <%= render "comment/form", comment: Comment.new %>
+<%= render "comment/form", comment: Comment.new %>
 ```
 
-So `comment` in the form, is the `Comment.new` object. We can assign a column value to this object when we instantiate it, using the ID of the current photo (the `.each` loop the comments are nested inside of):
+So `comment` in the form is the `Comment.new` object. We can assign a column value to this object when we instantiate it, using the ID of the current photo (the `.each` loop the comments are nested inside of):
 
 ```erb
-          <%= render "comment/form", comment: Comment.new(photo_id: photo.id) %>
+<%= render "comment/form", comment: Comment.new(photo_id: photo.id) %>
 ```
 
 Alternatively, we could have written:
 
 ```erb
-          <%= render "comment/form", comment: photo.comments.build %>
+<%= render "comment/form", comment: photo.comments.build %>
 ```
 
 Lastly, let's style the form with Bootstrap so that it looks good. There are nice ways of doing that with [Bootstrap forms](https://getbootstrap.com/docs/4.6/components/forms/). Without getting into the HTML for form accessibility, the gist of it here is that we need the class `"form-group"`, and then `"form-control"` around each input:
 
-```erb
+```erb{6-7,11}
 <!-- app/views/comments/_form.html.erb -->
 
-...
+<!-- ... -->
   <%= form.hidden :photo_id %>
 
   <div class="form-group">
@@ -536,7 +538,6 @@ Lastly, let's style the form with Bootstrap so that it looks good. There are nic
   </div>
 <% end %>
 ```
-{: mark_lines="6-7 11"}
 
 We also added a button class onto `form.submit` to make that look a bit nicer. I like to start with just black and white there until I make color decisions later on.
 
@@ -544,12 +545,11 @@ On `/alice`, try out the new form. It should work, and it should redirect you to
 
 Let's fix that in the controller to redirect to the _previous location_. There's a nice method we haven't seen yet called `redirect_back`:
 
-```ruby
+```ruby{11}
 # app/controllers/comments_controller.rb
 
 class CommentsController < ApplicationController
-  ...
-  # POST /comments or /comments.json
+  # ...
   def create
     @comment = Comment.new(comment_params)
     @comment.author = current_user
@@ -564,10 +564,9 @@ class CommentsController < ApplicationController
       end
     end
   end
-  ...
+  # ...
 end
 ```
-{: mark_lines="12"}
 
 We provide a fallback argument to the method, in case Rails isn't able to detect what page the user came from.
 
@@ -579,19 +578,18 @@ g acm "Added photo commenting"
 
 The next thing we want to do is add the other collections of photos: liked, feed, and discover. We'll add these within a tabbed interface, so that we can click on tabs and select which collection of photos we want to see for the the user.
 
-
-## Tabbed Interface 00:00:00 to 
+## Tabbed interface
 
 Before we start on the tabbed interface, let's make a new branch (off of `rb-user-profile`) to work on:
 
 ```
-$ g s
+% g s
 On branch rb-user-profile...
 
-$ g cob rb-tabbed-interface
+% g cob rb-tabbed-interface
 ```
 
-Back in the live app, on the page `/alice` that we've been working on, we want tabs that say "Like photos", "Feed", etc. to move between the different photo collections for our user profile.
+Back in the live app, on the page `/alice` that we've been working on, we want tabs that say "Liked photos", "Feed", etc. to move between the different photo collections for our user profile.
 
 In the [Bootstrap navs section](https://getbootstrap.com/docs/4.6/components/navs/), there's a few interfaces with exactly what we want. I'm going to select the [active pills filled and justified](https://getbootstrap.com/docs/4.6/components/navs/#fill-and-justify).
 
@@ -627,14 +625,14 @@ Let's plop that in the user profile (inside of a `"row"` and `"col"` class for c
 </div>
 
 <% @user.own_photos.each do |photo| %>
-  ...
+  <!-- ... -->
 ```
 
 We should see the tabbed interface on the `/alice` page now, but what do we need for it to actually work?
 
-We need to create the URL paths for each of the tabs. For instance, `/alice/feed`, `alice/followers`, etc. Let's begin with `/alice/liked`, or, more generally, `/username/liked`:
+We need to create the URL paths for each of the tabs. For instance, `/alice/feed`, `alice/followers`, etc. Let's begin with `/alice/liked`, or, more generally, `/:username/liked`:
 
-```ruby
+```ruby{13}
 # config/routes.rb
 
 Rails.application.routes.draw do
@@ -652,30 +650,28 @@ Rails.application.routes.draw do
   get ":username" => "users#show", as: :user
 end
 ```
-{: mark_lines="13 15"}
 
-I'm thinking of this as a `photos_controller.rb` action `liked`, since it is supposed to return a collection of records from the `photos` table in our database. Note that we are able to drop the preceeding `/` slash from `:username` for both routes, that isn't necessary, and Rails will build this route from the root path.
+I'm thinking of this as a `photos_controller.rb` action `liked`, since it is supposed to return a collection of records from the `photos` table in our database. (Note that we are able to drop the preceding `/` slash from `:username` for both routes, that isn't necessary, and Rails will build this route from the root path.)
 
 Let's add this action now:
 
-```ruby
+```ruby{5-7}
 # app/controllers/photos_controller.rb
 
 class PhotosController < ApplicationController
-  ...
+  # ...
   def liked
     @user = User.find_by!(username: params.fetch(:username))
   end
-  ...
+  # ...
 end
 ```
-{: mark_lines="5-7"}
 
 And we can add the view template, `app/views/photos/liked.html.erb`, and put some dummy copy in there, then refresh `/alice/liked` and make sure our RCAV is up and running.
 
 Once that page is loading, let's add the proper links (with our helper methods) to the tabbed interface:
 
-```erb
+```erb{11,14}
 <!-- app/views/users/show.html.erb -->
 
 <div class="row">
@@ -705,17 +701,16 @@ Once that page is loading, let's add the proper links (with our helper methods) 
 </div>
 
 <% @user.own_photos.each do |photo| %>
-  ...
+  <!-- ... -->
 ```
-{: mark_lines="11 14"}
 
 Try out the two links on `/alice` and see that they work. Yes? Good time to commit!
 
-Now the next step is getting the liked photos to show up. Actually, the page we want should look exactly like the user's photos page that we just spend all that time building out! We could copy everything from `users/show.html.erb` and paste it into `users/liked.html.erb`, but this is the perfect time for a partial!
+Now the next step is getting the liked photos to show up. Actually, the page we want should look exactly like the user's photos page that we just spent all of that time building out! We could copy everything from `users/show.html.erb` and paste it into `users/liked.html.erb`, but this is the perfect time for a partial!
 
 First, let's take all of the code for a photo card and create a partial for that `app/views/photos/_photo.html.erb`:
 
-```erb
+```erb{16,18}
 <!-- app/views/photos/_photo.html.erb -->
 
 <div class="row mb-4">
@@ -746,14 +741,13 @@ First, let's take all of the code for a photo card and create a partial for that
   </div>
 </div>
 ```
-{: mark_lines="16 18"}
 
 Allowing us to replace the code in the `show.html.erb` view template:
 
-```erb
+```erb{6}
 <!-- app/views/users/show.html.erb -->
 
-...
+<!-- ... -->
 
 <% @user.own_photos.each do |photo| %>
   <%= render "photos/photo", photo: photo %>
@@ -770,7 +764,7 @@ There's a lot of `photo`s in there. Let's be clear:
 
 If that's clear to you, then why not put the partial in the `liked.html.erb` template as well!
 
-```erb
+```erb{29-31}
 <!-- app/views/users/liked.html.erb -->
 
 <div class="row">
@@ -803,13 +797,12 @@ If that's clear to you, then why not put the partial in the `liked.html.erb` tem
   <%= render "photos/photo", photo: photo %>
 <% end %>
 ```
-{: mark_lines="29-31"}
 
 Check the links on `/alice` for "Posts" and "Like photos". It should all be working, which means you should be committing!
 
 On your own, see if you can get the same tabbed interface working for the remaining routes:
 
-```ruby
+```ruby{14-16}
 # config/routes.rb
 
 Rails.application.routes.draw do
@@ -830,6 +823,5 @@ Rails.application.routes.draw do
   get ":username" => "users#show", as: :user
 end
 ```
-{: mark_lines="14-16"}
 
 For the `followers` and `following` routes where we aren't showing photos in the interface, you could make a simple UI with a [Bootstrap list group of the relevant users, with links to each](https://getbootstrap.com/docs/4.6/components/list-group).
