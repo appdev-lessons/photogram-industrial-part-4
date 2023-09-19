@@ -537,13 +537,13 @@ Without getting into the HTML for form accessibility, the gist of it here is tha
 <!-- app/views/comments/_form.html.erb -->
 
 <!-- ... -->
-  <%= form.hidden :photo_id %>
+  <%= form.hidden_field :photo_id %>
 
-  <div class="form-group">
+  <div class="mb-3">
     <%= form.text_area :body, class: "form-control" %>
   </div>
 
-  <div class="actions">
+  <div>
     <%= form.submit class: "btn btn-outline-secondary btn-block" %>
   </div>
 <% end %>
