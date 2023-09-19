@@ -637,6 +637,11 @@ Let's plop that in the user profile (inside of a `"row"` and `"col"` class for c
 
 We should see the tabbed interface on the `/alice` page now, but what do we need for it to actually work?
 
+<div class="bg-red-100 py-1 px-5" markdown="1">
+
+In the video, I put the `/alice/liked` action into the `PhotosController`, you should instead follow along with the code below, where I put the action in the `UsersController`.
+</div>
+
 We need to create the URL paths for each of the tabs. For instance, `/alice/feed`, `alice/followers`, etc. Let's begin with `/alice/liked`, or, more generally, `/:username/liked`:
 
 ```ruby{13}
@@ -652,29 +657,31 @@ Rails.application.routes.draw do
   resources :likes
   resources :photos
 
-  get ":username/liked" => "photos#liked", as: :liked_photos
+  get ":username/liked" => "users#liked", as: :liked
 
   get ":username" => "users#show", as: :user
 end
 ```
 
-I'm thinking of this as a `photos_controller.rb` action `liked`, since it is supposed to return a collection of records from the `photos` table in our database. (Note that we are able to drop the preceding `/` slash from `:username` for both routes, that isn't necessary, and Rails will build this route from the root path.)
+Note that we are able to drop the preceding `/` slash from `:username` for both routes, that isn't necessary, and Rails will build this route from the root path.
 
 Let's add this action now:
 
-```ruby{5-7}
-# app/controllers/photos_controller.rb
+```ruby{8-10}
+# app/controllers/users_controller.rb
 
-class PhotosController < ApplicationController
-  # ...
+class UsersController < ApplicationController
+  def show
+    @user = User.find_by!(username: params.fetch(:username))
+  end
+
   def liked
     @user = User.find_by!(username: params.fetch(:username))
   end
-  # ...
 end
 ```
 
-And we can add the view template, `app/views/photos/liked.html.erb`, and put some dummy copy in there, then refresh `/alice/liked` and make sure our RCAV is up and running.
+And we can add the view template, `app/views/users/liked.html.erb`, and put some dummy copy in there, then refresh `/alice/liked` and make sure our RCAV is up and running.
 
 Once that page is loading, let's add the proper links (with our helper methods) to the tabbed interface:
 
@@ -692,23 +699,9 @@ Once that page is loading, let's add the proper links (with our helper methods) 
         <%= link_to "Posts", user_path(@user.username), class: "nav-link" %>
       </li>
       <li class="nav-item">
-        <%= link_to "Liked photos", liked_photos_path(@user.username), class: "nav-link" %>
+        <%= link_to "Liked photos", liked_path(@user.username), class: "nav-link" %>
       </li>
-      <li class="nav-item">
-        <a class="nav-link" href="#">Feed</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="#">Followers</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="#">Following</a>
-      </li>
-    </ul>
-  </div>
-</div>
-
-<% @user.own_photos.each do |photo| %>
-  <!-- ... -->
+      <!-- ... -->
 ```
 
 Try out the two links on `/alice` and see that they work. Yes? Good time to commit!
@@ -731,9 +724,11 @@ First, let's take all of the code for a photo card and create a partial for that
       <ul class="list-group list-group-flush">
         <% photo.comments.each do |comment| %>
           <li class="list-group-item">
-            <div class="media">
-              <img src="..." class="mr-3" alt="...">
-              <div class="media-body">
+            <div class="d-flex">
+              <div class="flex-shrink-0">
+                <img src="..." alt="...">
+              </div>
+              <div class="flex-grow-1 ms-3">
                 <h5 class="mt-0"><%= comment.author.username %></h5>
                 <p><%= comment.body %></p>
               </div>
@@ -742,7 +737,7 @@ First, let's take all of the code for a photo card and create a partial for that
         <% end %>
       </ul>
       <div class="card-body">
-        <%= render "comments/form", comment: Comment.new %>
+        <%= render "comments/form", comment: photo.comments.build %>
       </div>
     </div>
   </div>
@@ -755,12 +750,10 @@ Allowing us to replace the code in the `show.html.erb` view template:
 <!-- app/views/users/show.html.erb -->
 
 <!-- ... -->
-
 <% @user.own_photos.each do |photo| %>
   <%= render "photos/photo", photo: photo %>
 <% end %>
 ```
-{: mark_lines="6"}
 
 There's a lot of `photo`s in there. Let's be clear:
 
@@ -785,7 +778,7 @@ If that's clear to you, then why not put the partial in the `liked.html.erb` tem
         <%= link_to "Posts", user_path(@user.username), class: "nav-link" %>
       </li>
       <li class="nav-item">
-        <%= link_to "Liked photos", liked_photos_path(@user.username), class: "nav-link" %>
+        <%= link_to "Liked photos", liked_path(@user.username), class: "nav-link" %>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="#">Feed</a>
@@ -822,7 +815,7 @@ Rails.application.routes.draw do
   resources :likes
   resources :photos
 
-  get ":username/liked" => "photos#liked", as: :liked_photos
+  get ":username/liked" => "users#liked", as: :liked
   get ":username/feed"
   get ":username/followers"
   get ":username/following"
