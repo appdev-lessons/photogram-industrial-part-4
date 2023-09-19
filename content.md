@@ -348,7 +348,7 @@ The card is looking pretty good, but let's grab the Bootstrap [media objects](ht
 In Bootstrap version 5, media objects now [need to be recreated using flex utilities](https://getbootstrap.com/docs/5.2/utilities/flex/#media-object). The video uses the version 4 media object option, but the code below (and your code) should use the more recent update.
 </div>
 
-```erb{16-22}
+```erb{16-24}
 <!-- app/views/users/show.html.erb -->
 
 <!-- ... -->
@@ -364,9 +364,11 @@ In Bootstrap version 5, media objects now [need to be recreated using flex utili
         <ul class="list-group list-group-flush">
           <% photo.comments.each do |comment| %>
             <li class="list-group-item">
-              <div class="media">
-                <img src="..." class="mr-3" alt="...">
-                <div class="media-body">
+              <div class="d-flex">
+                <div class="flex-shrink-0">
+                  <img src="..." alt="...">
+                </div>
+                <div class="flex-grow-1 ms-3">
                   <h5 class="mt-0"><%= comment.author.username %></h5>
                   <p><%= comment.body %></p>
                 </div>
