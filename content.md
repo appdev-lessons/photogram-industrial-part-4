@@ -398,15 +398,10 @@ g acm "Added own photos to users#show"
 
 The next step is to add a comment form at the bottom of each photo card. Happily, because of the `scaffold` generator, we already have comment forms ready for us as a partial in `app/views/comments/` as `_form.html.erb`, so let's just render those in:
 
-```erb{16-18}
+```erb{11-13}
 <!-- app/views/users/show.html.erb -->
 
 <!-- ... -->
-          <% photo.comments.each do |comment| %>
-            <li class="list-group-item">
-              <div class="media">
-                <img src="..." class="mr-3" alt="...">
-                <div class="media-body">
                   <h5 class="mt-0"><%= comment.author.username %></h5>
                   <p><%= comment.body %></p>
                 </div>
@@ -415,7 +410,7 @@ The next step is to add a comment form at the bottom of each photo card. Happily
           <% end %>
         </ul>
         <div class="card-body">
-          <%= render "comment/form" %>
+          <%= render "comments/form" %>
         </div>
       </div>
     </div>
@@ -432,7 +427,7 @@ No, because of an `undefined local variable or method comment` in this partial. 
 
 <!-- ... -->
         <div class="card-body">
-          <%= render "comment/form", comment: Comment.new %>
+          <%= render "comments/form", comment: Comment.new %>
         </div>
       </div>
     </div>
@@ -513,19 +508,19 @@ Note that we can just use the `current_user` method that devise created for us, 
 But how do we get the current photo ID into the form? Have a look at the `render` method in the user's show page. Right now we have:
 
 ```erb
-<%= render "comment/form", comment: Comment.new %>
+<%= render "comments/form", comment: Comment.new %>
 ```
 
 So `comment` in the form is the `Comment.new` object. We can assign a column value to this object when we instantiate it, using the ID of the current photo (the `.each` loop the comments are nested inside of):
 
 ```erb
-<%= render "comment/form", comment: Comment.new(photo_id: photo.id) %>
+<%= render "comments/form", comment: Comment.new(photo_id: photo.id) %>
 ```
 
 Alternatively, we could have written:
 
 ```erb
-<%= render "comment/form", comment: photo.comments.build %>
+<%= render "comments/form", comment: photo.comments.build %>
 ```
 
 Lastly, let's style the form with Bootstrap so that it looks good. There are nice ways of doing that with [Bootstrap forms](https://getbootstrap.com/docs/4.6/components/forms/). 
@@ -750,7 +745,7 @@ First, let's take all of the code for a photo card and create a partial for that
         <% end %>
       </ul>
       <div class="card-body">
-        <%= render "comment/form", comment: Comment.new %>
+        <%= render "comments/form", comment: Comment.new %>
       </div>
     </div>
   </div>
