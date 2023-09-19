@@ -9,6 +9,7 @@
 - Anything contained in the project "README" is now contained in this Lesson
 - I use `bin/server` to start my live app preview, _you_ should use `bin/dev`
 - I use `rails sample_data`, _you_ should use `rake sample_data`
+- I am using Bootstrap v4 in the video. The official Bootstrap docs now show v5 by default, so when referring to the docs, you can switch to [v4.6 using the dropdown in the top-right](https://getbootstrap.com/docs/4.6/getting-started/introduction/). However, this isn't strictly necessary and you should be able to use the most up-to-date bootstrap version in your project without getting confused.
 </div>
 
 Did you read the differences above? Good! Then [here is a walkthrough video for this project.](https://share.descript.com/view/h3WXOoqhNNU)
@@ -68,19 +69,19 @@ Back in a terminal, make sure you are on the `starting-on-ui` branch (`g co <bra
 % git cob rb-user-profile
 ```
 
-## User Show Page Route 00:05:30 to 00:18:00
+## User show page route
 
-Let's get the app running with `bin/server` and have a look at what we want to do next. If we click around, we see the nice changes we made with the navbar and user sign in and sign out. 
+Let's get the app running with `bin/dev`. 
 
-Now I want to start make the user's show page, because everything will hinge on that. There will be links there for their liked photos, their feed, and their discover page. We'll also need a way to follow users on that page. 
+I want to start on the user's show page, because everything will hinge on that. There will be links there for their liked photos, their feed, and their discover page. We'll also need a way to follow users on that page. 
 
-Typically, the URL for a user's page is just **/username**, like **/alice**. Of course, if you try that now you will get a `No route matches` error.
+Typically, the URL for a user's page is just `/username`, like `/alice`. Of course, if you try that now you will get a `No route matches` error.
 
-Devise doesn't set up the normal CRUD routes for us, so even if we tried something like **/users/1**, we would still get the routing error.  
+Devise doesn't set up the normal CRUD routes for us, so even if we tried something like `/users/1`, we would still get the routing error.  
 
 But that's okay, because we know how to RCAV. We can build the route we want from scratch, starting with `routes.rb`:
 
-```ruby
+```ruby{6}
 # config/routes.rb
 
 Rails.application.routes.draw do
@@ -94,18 +95,16 @@ Rails.application.routes.draw do
   resources :follow_requests
   resources :likes
   resources :photos
-  # For details on the DSL available within this file, see https://guides.rubyonrails.org/routing.html
 end
 ```
-{: mark_lines="6"}
 
-We are using our new shorthand syntax to create this get request, and name it so that we have our `user_path` and `user_url` route helper methods. 
+We are using our new shorthand syntax to create this get request, and name it with `as:` so that we have our `user_path` and `user_url` route helper methods. 
 
-We could have just put `resources :users`, which would give us the golden seven routes. But, we want more control over things in this case, so we just generate the single route of interest. 
+We could have just put `resources :users`, but we want more control over things in this case, so we just generate the single route of interest. 
 
 However, there's a variation of `resources`, passing the `only:` option to provide the routes that we want to create:
 
-```ruby
+```ruby{6,14}
 # config/routes.rb
 
 Rails.application.routes.draw do
@@ -122,15 +121,14 @@ Rails.application.routes.draw do
   resources :users, only: :show
 end
 ```
-{: mark_lines="6 14"}
 
 We'll use the route defined in this way with `resources ... only:`, and put it at the bottom of the list of resources.
 
-But wait! We just defined the route **/users/alice**! What we intended, was the route **/alice** (i.e., **/username**).
+But wait! We just defined the route `/users/alice`! What we intended, was the route `/alice` (i.e., `/username`).
 
 In that case, what we actually want is just:
 
-```ruby
+```ruby{13}
 # config/routes.rb
 
 Rails.application.routes.draw do
@@ -146,11 +144,10 @@ Rails.application.routes.draw do
   get "/:username" => "users#show", as: :user
 end
 ```
-{: mark_lines="13"}
 
 Because `"/:username"` is such a general route we need to put it at the bottom of the list. Otherwise, anytime we tried to get to `"/photos` or `"/comments"`, Rails would try to fill that segment in as the flexible `:username` parameter.
 
-In the live app, try to navigate to **/alice**. What do you know, an error `uninitialized constant UsersController`. Devise didn't generate any `users_controller.rb` for us, so we'll need to make that file and fill it in ourselves:
+In the live app, try to navigate to `/alice`. What do you know, an error `uninitialized constant UsersController`. Devise didn't generate any `users_controller.rb` for us, so we'll need to make that file and fill it in ourselves:
 
 ```ruby
 # app/controllers/users_controller.rb
@@ -160,13 +157,12 @@ class UsersController < ApplicationController
   end
 end
 ```
-{: mark_lines=""}
 
-We don't need the `render` statement, because we will right away make our conventionally named view template `app/views/users/show.html.erb`, say "hi" in it, and try to view the page **/alice** again. Working? Good! Commit that work.
+We don't need the `render` statement, because we will right away make our conventionally named view template `app/views/users/show.html.erb`, say "hi" in it, and try to view the page `/alice` again. Working? Good! Commit that work.
 
 Continuing on, we want to back into the logic we need to make the action do what we want:
 
-```ruby
+```ruby{5}
 # app/controllers/users_controller.rb
 
 class UsersController < ApplicationController
@@ -175,7 +171,6 @@ class UsersController < ApplicationController
   end
 end
 ```
-{: mark_lines="5"}
 
 We need the `find_by` method, because the value returned by `params.fetch(:username)` in our example is `"alice"`, which won't work with `find`, because that method expects an ID number.
 
@@ -188,15 +183,16 @@ Make sure that worked by adding something to the view template:
   <%= @user.username %>
 </h1>
 ```
-{: mark_lines=""}
 
-And refresh **/alice** to see the result. What if we change the URL to something that doesn't exist, like **/foo**?
+And refresh `/alice` to see the result. What if we change the URL to something that doesn't exist, like `/foo`?
 
 If we were using the `find` method, the return would be an `record not found` error. That's good, because it would mean a 404 page for the user, rather than an internal 500-type server error on our side. But, as we see when we try to navigate to the non-existent user, `find_by` returns the more problematic `undefined method for nil` 500-type error that we want to avoid. So what to do?
 
-We want a 400 error, which are errors caused by normal operation, like someone trying to navigate to a location that doesn't exist. Well, there's actually a variation of `find_by` called `find_by!` with an exclamation mark. The purpose of that is to throw the `record not found` error:
+We want a 400 error, which are errors caused by normal operation, like someone trying to navigate to a location that doesn't exist. 
 
-```ruby
+There's actually a variation of `find_by` called `find_by!` with an exclamation mark. The purpose of that is to throw the `record not found` error:
+
+```ruby{5:(18-25)}
 # app/controllers/users_controller.rb
 
 class UsersController < ApplicationController
@@ -205,9 +201,8 @@ class UsersController < ApplicationController
   end
 end
 ```
-{: mark_lines="5"}
 
-Now **/alice** should still work, and **/foo** should show the 400-type error.
+Now `/alice` should still work, and `/foo` should show the 400-type error.
 
 Commit!
 
@@ -221,15 +216,15 @@ And push! (with the `--set-upstream` flag if it's the first push)
 g p
 ```
 
-Once you push, you should see a link to open a pull request in the terminal. You can click that link, and then be sure to set the base branch to the most recent branch `rb-starting-on-ui`, so you are only comparing these recent changes to that (which is in turn comparing against `photogram-industrial`, which is in turn comparing against `main`).
+Once you push, you should see a link to open a pull request in the terminal. You can click that link, and then be sure to set the base branch to the most recent branch (`rb-starting-on-ui` for me), so you are only comparing these recent changes to that (which is in turn comparing against `photogram-industrial`, which is in turn comparing against `main`).
 
-## User Profile Own Photos 00:18:00 to 00:28:00
+## User profile own photos
 
 With our route working, data marshalled in the controller, and view template waiting for us, let's begin to add some content.
 
-We'll start by just getting some photos on the page, then worry about making them look pretty:
+We'll start by getting some photos on the page, then worry about making them look pretty:
 
-```erb
+```erb{7-16}
 <!-- app/views/users/show.html.erb -->
 
 <h1>
@@ -247,21 +242,15 @@ We'll start by just getting some photos on the page, then worry about making the
   <% end %>
 </ul>
 ```
-{: mark_lines="7-16"}
 
-Since we spent so much time in the backend, we have lots of methods like `.own_photos` that make this process painless! Refresh **/alice** and see the result.
+Since we spent so much time in the backend, we have lots of methods like `.own_photos` that make this process painless! Refresh `/alice` and see the result.
 
 Back to the view template, there's actually, you guessed it, a helper method for `<img>` that we should be using instead of the HTML element:
 
-```erb
+```erb{8}
 <!-- app/views/users/show.html.erb -->
 
-<h1>
-  <%= @user.username %>
-</h1>
-
-<h2>Own photos</h2>
-
+<!-- ... -->
 <ul>
   <% @user.own_photos.each do |photo| %>
   <li>
@@ -271,21 +260,17 @@ Back to the view template, there's actually, you guessed it, a helper method for
   <% end %>
 </ul>
 ```
-{: mark_lines="13"}
 
 There's more option that `image_tag` can take to get different formats back, among other things, but we'll just use it as-is for now.
 
 Bootstrap has [a bunch of different types of cards](https://getbootstrap.com/docs/4.6/components/card/), including some for exactly what we want here: an image, some information about the thing, and comments. We can use [the kitchen sink example](https://getbootstrap.com/docs/4.6/components/card/#kitchen-sink) as a good jumping off point.
 
-As usual, we can copy in the full kitchen sink example and style it in our view template:
+As usual, we can copy in the example and style it in our view template:
 
-```erb
+```erb{7-27}
 <!-- app/views/users/show.html.erb -->
 
-<h1>
-  <%= @user.username %>
-</h1>
-
+<!-- ... -->
 <h2>Own photos</h2>
 
 <% @user.own_photos.each do |photo| %>
@@ -311,9 +296,8 @@ As usual, we can copy in the full kitchen sink example and style it in our view 
   </div>
 <% end %>
 ```
-{: mark_lines="10-30"}
 
-We made some changes to the kitchen sink example when we put it in our view template. Those were as follows:
+We made some changes to the example when we put it in our view template. Those were as follows:
   
   - Put the entire card in a Bootstrap grid `"row"` with a margin bottom `mb` of 4 (to provide some vertical spacing), and `"col"` with a margin distance `md` of 6 and offset of 3 (to center it). 
   - Removed the `sytle="width: 18rem;"` from the `"card"`, since that would have offset our centering. 
@@ -323,14 +307,14 @@ We made some changes to the kitchen sink example when we put it in our view temp
 
 Now, rather than each `photo` rendering in an `<li>` within a `<ul>`, they will render in a separate card.
 
-Refresh **/alice** and view the results.
+Refresh `/alice` and view the results.
 
 It looks good, but now we want to render the comments in place of "An item", "A second item", etc. below the figure caption. We can do that by creating a nested `.each` loop to render each caption on the card iteratively:
 
-```erb
+```erb{14-18}
 <!-- app/views/users/show.html.erb -->
 
-...
+<!-- ... -->
 <% @user.own_photos.each do |photo| %>
   <div class="row mb-4">
     <div class="col-md-6 offset-md-3">
@@ -356,14 +340,13 @@ It looks good, but now we want to render the comments in place of "An item", "A 
   </div>
 <% end %>
 ```
-{: mark_lines="14-18"}
 
 The card is looking pretty good, but let's grab the Bootstrap [media objects](https://getbootstrap.com/docs/4.6/components/media-object/) code to give us the option of adding an avatar to each comment:
 
-```erb
+```erb{16-22}
 <!-- app/views/users/show.html.erb -->
 
-...
+<!-- ... -->
 <% @user.own_photos.each do |photo| %>
   <div class="row mb-4">
     <div class="col-md-6 offset-md-3">
@@ -395,7 +378,6 @@ The card is looking pretty good, but let's grab the Bootstrap [media objects](ht
   </div>
 <% end %>
 ```
-{: mark_lines="16-22"}
 
 For now, the `<img src="...">` will just be a placeholder, since we didn't add profile pictures as a column in the `User` table. But, when we do add these, we'll be able to replace that line and get some avatars for each comment.
 
@@ -558,7 +540,7 @@ Lastly, let's style the form with Bootstrap so that it looks good. There are nic
 
 We also added a button class onto `form.submit` to make that look a bit nicer. I like to start with just black and white there until I make color decisions later on.
 
-On **/alice**, try out the new form. It should work, and it should redirect you to the show page for that comment. 
+On `/alice`, try out the new form. It should work, and it should redirect you to the show page for that comment. 
 
 Let's fix that in the controller to redirect to the _previous location_. There's a nice method we haven't seen yet called `redirect_back`:
 
@@ -609,7 +591,7 @@ On branch rb-user-profile...
 $ g cob rb-tabbed-interface
 ```
 
-Back in the live app, on the page **/alice** that we've been working on, we want tabs that say "Like photos", "Feed", etc. to move between the different photo collections for our user profile.
+Back in the live app, on the page `/alice` that we've been working on, we want tabs that say "Like photos", "Feed", etc. to move between the different photo collections for our user profile.
 
 In the [Bootstrap navs section](https://getbootstrap.com/docs/4.6/components/navs/), there's a few interfaces with exactly what we want. I'm going to select the [active pills filled and justified](https://getbootstrap.com/docs/4.6/components/navs/#fill-and-justify).
 
@@ -648,9 +630,9 @@ Let's plop that in the user profile (inside of a `"row"` and `"col"` class for c
   ...
 ```
 
-We should see the tabbed interface on the **/alice** page now, but what do we need for it to actually work?
+We should see the tabbed interface on the `/alice` page now, but what do we need for it to actually work?
 
-We need to create the URL paths for each of the tabs. For instance, **/alice/feed**, **alice/followers**, etc. Let's begin with **/alice/liked**, or, more generally, **/username/liked**:
+We need to create the URL paths for each of the tabs. For instance, `/alice/feed`, `alice/followers`, etc. Let's begin with `/alice/liked`, or, more generally, `/username/liked`:
 
 ```ruby
 # config/routes.rb
@@ -689,7 +671,7 @@ end
 ```
 {: mark_lines="5-7"}
 
-And we can add the view template, `app/views/photos/liked.html.erb`, and put some dummy copy in there, then refresh **/alice/liked** and make sure our RCAV is up and running.
+And we can add the view template, `app/views/photos/liked.html.erb`, and put some dummy copy in there, then refresh `/alice/liked` and make sure our RCAV is up and running.
 
 Once that page is loading, let's add the proper links (with our helper methods) to the tabbed interface:
 
@@ -727,7 +709,7 @@ Once that page is loading, let's add the proper links (with our helper methods) 
 ```
 {: mark_lines="11 14"}
 
-Try out the two links on **/alice** and see that they work. Yes? Good time to commit!
+Try out the two links on `/alice` and see that they work. Yes? Good time to commit!
 
 Now the next step is getting the liked photos to show up. Actually, the page we want should look exactly like the user's photos page that we just spend all that time building out! We could copy everything from `users/show.html.erb` and paste it into `users/liked.html.erb`, but this is the perfect time for a partial!
 
@@ -823,7 +805,7 @@ If that's clear to you, then why not put the partial in the `liked.html.erb` tem
 ```
 {: mark_lines="29-31"}
 
-Check the links on **/alice** for "Posts" and "Like photos". It should all be working, which means you should be committing!
+Check the links on `/alice` for "Posts" and "Like photos". It should all be working, which means you should be committing!
 
 On your own, see if you can get the same tabbed interface working for the remaining routes:
 
