@@ -9,7 +9,7 @@
 - Anything contained in the project "README" is now contained in this Lesson
 - I use `bin/server` to start my live app preview, _you_ should use `bin/dev`
 - I use `rails sample_data`, _you_ should use `rake sample_data`
-- I am using Bootstrap v4 in the video. The official Bootstrap docs now show v5 by default, so when referring to the docs, you can switch to [v4.6 using the dropdown in the top-right](https://getbootstrap.com/docs/4.6/getting-started/introduction/). However, this isn't strictly necessary and you should be able to use the most up-to-date bootstrap version in your project without getting confused.
+- I am using using Bootstrap version 4 in the video. The official Bootstrap docs now show v5 by default. Links and code contained in this document are based on the version 5 Bootstrap.
 </div>
 
 Did you read the differences above? Good! Then [here is a walkthrough video for this project.](https://share.descript.com/view/h3WXOoqhNNU)
@@ -263,7 +263,7 @@ Back to the view template, there's actually, you guessed it, a helper method for
 
 There's more option that `image_tag` can take to get different formats back, among other things, but we'll just use it as-is for now.
 
-Bootstrap has [a bunch of different types of cards](https://getbootstrap.com/docs/4.6/components/card/), including some for exactly what we want here: an image, some information about the thing, and comments. We can use [the kitchen sink example](https://getbootstrap.com/docs/4.6/components/card/#kitchen-sink) as a good jumping off point.
+Bootstrap has [a bunch of different types of cards](https://getbootstrap.com/docs/5.2/components/card/), including some for exactly what we want here: an image, some information about the thing, and comments. We can use [the kitchen sink example](https://getbootstrap.com/docs/5.2/components/card/#kitchen-sink) as a good jumping off point.
 
 As usual, we can copy in the example and style it in our view template:
 
@@ -342,6 +342,11 @@ It looks good, but now we want to render the comments in place of "An item", "A 
 ```
 
 The card is looking pretty good, but let's grab the Bootstrap [media objects](https://getbootstrap.com/docs/4.6/components/media-object/) code to give us the option of adding an avatar to each comment:
+
+<div class="bg-red-100 py-1 px-5" markdown="1">
+
+In Bootstrap version 5, media objects now [need to be recreated using flex utilities](https://getbootstrap.com/docs/5.2/utilities/flex/#media-object). The video uses the version 4 media object option, but the code below (and your code) should use the more recent update.
+</div>
 
 ```erb{16-22}
 <!-- app/views/users/show.html.erb -->
@@ -521,7 +526,15 @@ Alternatively, we could have written:
 <%= render "comment/form", comment: photo.comments.build %>
 ```
 
-Lastly, let's style the form with Bootstrap so that it looks good. There are nice ways of doing that with [Bootstrap forms](https://getbootstrap.com/docs/4.6/components/forms/). Without getting into the HTML for form accessibility, the gist of it here is that we need the class `"form-group"`, and then `"form-control"` around each input:
+Lastly, let's style the form with Bootstrap so that it looks good. There are nice ways of doing that with [Bootstrap forms](https://getbootstrap.com/docs/4.6/components/forms/). 
+
+<div class="bg-red-100 py-1 px-5" markdown="1">
+
+In Bootstrap version 5, [the form instructions can now be found here](https://getbootstrap.com/docs/5.3/forms/overview/#overview). The video uses the version 4 form components, but the code below (and your code) should use the more recent update.
+</div>
+
+
+Without getting into the HTML for form accessibility, the gist of it here is that we need the class `"form-group"`, and then `"form-control"` around each input:
 
 ```erb{6-7,11}
 <!-- app/views/comments/_form.html.erb -->
@@ -591,7 +604,7 @@ On branch rb-user-profile...
 
 Back in the live app, on the page `/alice` that we've been working on, we want tabs that say "Liked photos", "Feed", etc. to move between the different photo collections for our user profile.
 
-In the [Bootstrap navs section](https://getbootstrap.com/docs/4.6/components/navs/), there's a few interfaces with exactly what we want. I'm going to select the [active pills filled and justified](https://getbootstrap.com/docs/4.6/components/navs/#fill-and-justify).
+In the [Bootstrap navs section](https://getbootstrap.com/docs/5.2/components/navs-tabs/), there's a few interfaces with exactly what we want. I'm going to select the [active pills filled and justified](https://getbootstrap.com/docs/5.2/components/navs-tabs/#fill-and-justify).
 
 Let's plop that in the user profile (inside of a `"row"` and `"col"` class for centering with the photo cards):
 
@@ -824,4 +837,4 @@ Rails.application.routes.draw do
 end
 ```
 
-For the `followers` and `following` routes where we aren't showing photos in the interface, you could make a simple UI with a [Bootstrap list group of the relevant users, with links to each](https://getbootstrap.com/docs/4.6/components/list-group).
+For the `followers` and `following` routes where we aren't showing photos in the interface, you could make a simple UI with a [Bootstrap list group of the relevant users, with links to each](https://getbootstrap.com/docs/5.2/components/list-group).
