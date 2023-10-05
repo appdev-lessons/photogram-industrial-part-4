@@ -43,7 +43,7 @@ Before we begin, I'd like to create a new branch. First, let's make sure to open
 
 <div class="bg-blue-100 py-1 px-5" markdown="1">
 
-Follow along with a the video for a visual demonstration of the process here.
+Follow along with the video for a visual demonstration of the process here.
 </div>
 
 Make sure you've pushed the `<initials>-photogram-industrial` and `<initials>-starting-on-ui` branches to Github and that `git status` (or, as we aliased it, just `g`) returns `Everything up-to-date`. 
