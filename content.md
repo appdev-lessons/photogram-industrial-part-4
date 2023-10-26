@@ -62,11 +62,11 @@ With a PR open on `<initials>-photogram-industrial` to `main`, we can open a sec
 
 Again, we can give this PR another useful title, like "Starting on UI", then open it. And we will see the `git diff` in this PR just compares the two branches, ignoring `main`.
 
-Back in a terminal, make sure you are on the `starting-on-ui` branch (`g co <branch-name>`), and branch off of _this_ branch to continue your work.
+Back in a terminal, make sure you are on the `starting-on-ui` branch (`git checkout <branch-name>`), and branch off of _this_ branch to continue your work.
 
 ```
-% git co rb-starting-on-ui
-% git cob rb-user-profile
+% git checkout rb-starting-on-ui
+% git checkout -b rb-user-profile
 ```
 
 ## User show page route
